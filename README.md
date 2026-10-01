@@ -6,13 +6,13 @@ Animated versions of Figure 1 from the perspective
 Figure 1 sketches predictive systems as radar plots over (illustrative) knowledge
 dimensions *d₁ … d_k*. For each system, a **solid outline** marks what it has learned
 from data so far, and a **dashed outline** marks the most it could ever reach — its
-capacity bound, set by its inductive commitment. These three short movies make the
+capacity bound, set by its inductive commitment. These four short movies make the
 ideas in the figure move, for use in talks.
 
 All geometry, colours, and line weights are taken directly from the original
 Illustrator figure (`source.ai`), so the movies match the paper.
 
-**Just want the videos?** Ready-made 1080p MP4s of all three movies, for white and
+**Just want the videos?** Ready-made 1080p MP4s of all four movies, for white and
 for black slides, are attached to the
 [latest release](https://github.com/fjug/AI4Science_CapacityBoundsAndData/releases/latest).
 
@@ -61,6 +61,25 @@ correctly and orange when not:
    revealed at the end and is narrower than the capacity bound.
 
 Short captions fade in and out at each step.
+
+### 4 · Uncertainty-guided acquisition — `uncertainty_guided_acquisition` (23 s)
+
+<img src="docs/uncertainty_guided_acquisition.gif" width="100%">
+
+Data is expensive. Two identical copies of the blue system from Fig. 1(d, e) learn
+side by side; below each, bars track **new data acquired** and **new area covered**.
+
+- **Left — random data acquisition.** 20 observations arrive at random. Most land
+  inside the area already learned and are redundant (grey with olive ring, as in
+  Fig. 1(c)); only a few expand the outline.
+- **Right — guided by epistemic uncertainty.** The system is queried all over its
+  plot; each query is coloured by its epistemic uncertainty, from green (low) to
+  red (high). An experiment is run only where the system is most unsure, and the
+  new observation expands the outline. After just 5 such experiments, the learned
+  area has grown as much — and into the same shape — as with 20 random ones.
+
+The message: guiding expensive data acquisition by epistemic uncertainty gets you to
+a better predictive system with far less effort.
 
 ## Colour themes
 
@@ -128,19 +147,29 @@ THEME=dark uv run manim -ql -p what_can_be_predicted.py WhatCanBePredicted
 | Data points of movie 1 (where, in which order) | `DATA_B` in [`radar.py`](radar.py) |
 | Data points of movie 2 | `DATA_A` and `SHARED` in [`not_all_data_is_for_everyone.py`](not_all_data_is_for_everyone.py) |
 | Query points, captions, and timing of movie 3 | [`what_can_be_predicted.py`](what_can_be_predicted.py) |
+| Number of random points and guided rounds, uncertainty model, layout of movie 4 | top of [`uncertainty_guided_acquisition.py`](uncertainty_guided_acquisition.py) |
 | Colours | [`themes.py`](themes.py) |
 
 Points are given as `(axis, radius)`: axis `0` is *d₁* at the top, counting
 clockwise up to `7` (*d_k*), and the radius is in the figure’s units (points in
 `source.ai`; the outer circle is 145).
 
+Movie 4 draws its data at random, from two fixed seeds chosen so that both sides
+end with the same gain in area and nearly the same shape. If you change its
+settings, find a new matching pair with:
+
+```bash
+uv run python uncertainty_guided_acquisition.py
+```
+
 ## Project layout
 
 ```
-radar.py                          shared drawing code: radar, outlines, data points
+radar.py                          shared drawing code: radar (any size/position), outlines, data points
 data_expands_reach.py             movie 1
 not_all_data_is_for_everyone.py   movie 2
 what_can_be_predicted.py          movie 3
+uncertainty_guided_acquisition.py movie 4
 themes.py                         colour schemes
 render_all.py                     renders every movie in every theme
 source.ai                         original Figure 1 (Illustrator, PDF-compatible)
