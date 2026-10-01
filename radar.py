@@ -87,23 +87,27 @@ def unusable_dot(axis, r):
     return dot(axis, r, GREY_FILL, RED)
 
 
-class RadarScene(Scene):
-    """Draws the static radar plus two animatable learned outlines.
+class Radar:
+    """One radar plot with an animatable learned outline per model.
 
-    self.a_vals / self.b_vals hold one ValueTracker per axis (radius in pt);
-    animating them reshapes the solid outlines and fills.
+    Placed at `center` (manim coordinates) and drawn at `k` times the size of
+    the figure. a_vals / b_vals hold one ValueTracker per axis (radius in pt);
+    animating them reshapes the solid outlines and fills. `group` holds every
+    mobject, in drawing order; add it to a scene.
     """
 
-    def build(self, a_learned, b_learned=None, a_capacity=A_CAPACITY):
-        self.camera.background_color = BG
+    def __init__(self, a_learned, b_learned=None, a_capacity=A_CAPACITY,
+                 center=ORIGIN, k=1.0):
+        self.center, self.k = np.array(center, dtype=float), k
+        lw = LW * max(0.75, k)       # strokes shrink less than the geometry
 
-        grid = VGroup(*[dashed(Circle(radius=r * S), 3, 3).set_stroke(GRID, LW)
+        grid = VGroup(*[dashed(Circle(radius=r * S), 3, 3).set_stroke(GRID, lw)
                         for r in (36.2, 72.5, 108.8)])
-        grid.add(Circle(radius=145 * S).set_stroke(GRID, 1.5 * LW))
+        grid.add(Circle(radius=145 * S).set_stroke(GRID, 1.5 * lw))
 
         axes = VGroup()
         for d in DIRS:
-            axes.add(Line(ORIGIN, d * 145 * S).set_stroke(AXIS, LW))
+            axes.add(Line(ORIGIN, d * 145 * S).set_stroke(AXIS, lw))
             tip = d * 158.2 * S
             n = np.array([-d[1], d[0], 0])
             axes.add(Polygon(tip, tip - d * 7.2 * S + n * 3.6 * S,
@@ -127,13 +131,14 @@ class RadarScene(Scene):
                           aligned_edge=DL)
                 labels.add(s)
 
-        centre = Dot(ORIGIN, radius=7 * S, color=CENTRE)
+        static = VGroup(grid, axes, labels).scale(k, about_point=ORIGIN).shift(self.center)
+        centre = Dot(self.center, radius=7 * S * k, color=CENTRE)
 
         self.a_vals = [ValueTracker(r) for r in a_learned]
         self.b_vals = [ValueTracker(r) for r in b_learned] if b_learned else None
 
         def poly(vals):
-            return Polygon(*radar_pts([v.get_value() for v in vals]))
+            return Polygon(*self.pts([v.get_value() for v in vals]))
 
         def fill_layers():
             g = VGroup(poly(self.a_vals).set_fill(FILL_A, 1).set_stroke(width=0))
@@ -148,32 +153,66 @@ class RadarScene(Scene):
         self.under = VGroup()
         layers.append(self.under)
         layers.append(always_redraw(
-            lambda: poly(self.a_vals).set_stroke(BLUE_S, 2 * LW).set_fill(opacity=0)))
+            lambda: poly(self.a_vals).set_stroke(BLUE_S, 2 * lw).set_fill(opacity=0)))
         if self.b_vals:
             layers.append(always_redraw(
-                lambda: poly(self.b_vals).set_stroke(ORANGE_S, 2 * LW).set_fill(opacity=0)))
-        layers.append(dashed(Polygon(*radar_pts(a_capacity)), 8, 7)
-                      .set_stroke(BLUE_D, 2 * LW))
+                lambda: poly(self.b_vals).set_stroke(ORANGE_S, 2 * lw).set_fill(opacity=0)))
+        layers.append(dashed(Polygon(*self.pts(a_capacity)), 8, 7)
+                      .set_stroke(BLUE_D, 2 * lw))
         if self.b_vals:
-            layers.append(dashed(Polygon(*radar_pts(B_CAPACITY)), 8, 7)
-                          .set_stroke(ORANGE_D, 2 * LW))
+            layers.append(dashed(Polygon(*self.pts(B_CAPACITY)), 8, 7)
+                          .set_stroke(ORANGE_D, 2 * lw))
 
         self.dots = VGroup()
-        self.add(grid, axes, labels, *layers, centre, self.dots)
+        self.group = VGroup(static, *layers, centre, self.dots)
+
+    def pts(self, radii):
+        return [self.center + p * self.k for p in radar_pts(radii)]
+
+    def at(self, axis, r):
+        """Manim point on `axis` at radius r (pt)."""
+        return self.center + DIRS[axis] * r * S * self.k
+
+    def place(self, mob, axis, r):
+        """Scale a mobject made for the full-size figure and put it on an axis."""
+        return mob.scale(self.k).move_to(self.at(axis, r))
+
+    def vals(self, model):
+        return self.a_vals if model == "A" else self.b_vals
+
+    def learned(self, model="A"):
+        return [v.get_value() for v in self.vals(model)]
 
     def grow(self, model, axis, r, **kw):
         """Animation moving one vertex of a learned outline out to radius r."""
-        v = (self.a_vals if model == "A" else self.b_vals)[axis]
+        v = self.vals(model)[axis]
         return v.animate(rate_func=rate_functions.ease_in_out_cubic, **kw) \
                 .set_value(max(v.get_value(), r))
 
     def nudge(self, model, axis, **kw):
-        v = (self.a_vals if model == "A" else self.b_vals)[axis]
+        v = self.vals(model)[axis]
         return v.animate(rate_func=rate_functions.ease_out_cubic, **kw) \
                 .set_value(v.get_value() + NUDGE)
 
-    def pop(self, d, run_time=0.3):
-        self.dots.add(d)
+
+class RadarScene(Scene):
+    """A scene with one full-size radar in the middle (movies 1-3)."""
+
+    def build(self, a_learned, b_learned=None, a_capacity=A_CAPACITY):
+        self.camera.background_color = BG
+        self.radar = Radar(a_learned, b_learned, a_capacity)
+        self.a_vals, self.b_vals = self.radar.a_vals, self.radar.b_vals
+        self.under, self.dots = self.radar.under, self.radar.dots
+        self.add(self.radar.group)
+
+    def grow(self, model, axis, r, **kw):
+        return self.radar.grow(model, axis, r, **kw)
+
+    def nudge(self, model, axis, **kw):
+        return self.radar.nudge(model, axis, **kw)
+
+    def pop(self, d, run_time=0.3, into=None):
+        (into if into is not None else self.dots).add(d)
         self.play(GrowFromCenter(d, rate_func=rate_functions.ease_out_back),
                   run_time=run_time)
 
