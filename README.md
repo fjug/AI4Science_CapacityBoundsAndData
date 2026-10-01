@@ -12,6 +12,10 @@ ideas in the figure move, for use in talks.
 All geometry, colours, and line weights are taken directly from the original
 Illustrator figure (`source.ai`), so the movies match the paper.
 
+**Just want the videos?** Ready-made 1080p MP4s of all three movies, for white and
+for black slides, are attached to the
+[latest release](https://github.com/fjug/AI4Science_CapacityBoundsAndData/releases/latest).
+
 ## The movies
 
 ### 1 · Data expands reach — `data_expands_reach` (10 s)
@@ -141,6 +145,7 @@ themes.py                         colour schemes
 render_all.py                     renders every movie in every theme
 source.ai                         original Figure 1 (Illustrator, PDF-compatible)
 docs/                             previews used in this README
+LICENSE                           MIT license
 ```
 
 ## Citation
@@ -150,3 +155,7 @@ If you use these animations, please cite the paper:
 ```
 <citation to be added>
 ```
+
+## License
+
+[MIT](LICENSE) © 2026 Florian Jug
