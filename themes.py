@@ -25,6 +25,9 @@ THEMES = {
         FAIL="#CC833C",        # fill: prediction failed
         TXT_INTER="#A4A44D", TXT_EXTRA="#CC833C", TXT_FAIL="#D62F27",
         REACH_FILL="#F4F4E9",  # band between learned outline and extrapolation reach
+        REDUNDANT="#C4C4C4",   # fill: redundant data (inside the learned area), as in (c)
+        # epistemic uncertainty, low -> high
+        UNC_0="#4E9A3E", UNC_1="#C9B83A", UNC_2="#E8892B", UNC_3="#C0392B",
     ),
     "dark": dict(
         BG="#000000",
@@ -44,5 +47,7 @@ THEMES = {
         FAIL="#E89645",
         TXT_INTER="#CBCB66", TXT_EXTRA="#F0A35A", TXT_FAIL="#FF5C50",
         REACH_FILL="#26261A",
+        REDUNDANT="#5E6166",
+        UNC_0="#6CC04A", UNC_1="#E3CF4A", UNC_2="#F5963A", UNC_3="#F04E3E",
     ),
 }

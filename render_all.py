@@ -21,6 +21,7 @@ MOVIES = {  # file stem -> scene class
     "data_expands_reach": "DataExpandsReach",
     "not_all_data_is_for_everyone": "NotAllDataIsForEveryone",
     "what_can_be_predicted": "WhatCanBePredicted",
+    "uncertainty_guided_acquisition": "UncertaintyGuidedAcquisition",
 }
 QUALITY_DIR = {"l": "480p15", "m": "720p30", "h": "1080p60", "k": "2160p60"}
 
