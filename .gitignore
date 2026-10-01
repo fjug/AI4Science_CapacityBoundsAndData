@@ -1,0 +1,12 @@
+# Python / uv
+.venv/
+__pycache__/
+
+# Manim render cache and outputs (re-create with: uv run python render_all.py)
+media/
+movies/
+
+# local leftovers
+old/
+source.png
+.DS_Store

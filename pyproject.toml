@@ -1,0 +1,8 @@
+[project]
+name = "is-this-progress-fig1-animations"
+version = "0.1.0"
+description = "Manim animations of Figure 1 from \"Is This Progress? On the utility of predictive systems for scientific discovery\""
+requires-python = ">=3.12"
+dependencies = [
+    "manim>=0.21.0",
+]
